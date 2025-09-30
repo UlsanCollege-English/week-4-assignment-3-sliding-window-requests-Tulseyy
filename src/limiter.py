@@ -1,16 +1,18 @@
-
 from collections import deque
 
 class RateLimiter:
     def __init__(self, N, W):
-        # TODO: store capacity N, window W, and a queue of timestamps
-        self.N = N
-        self.W = W
-        self._q = None  # TODO
+        self.N = N        # Max allowed requests
+        self.W = W        # Time window in seconds
+        self._q = deque() # Queue to store timestamps
 
     def allow(self, t):
-        """
-        Return True if request at time t is allowed (and record it), else False.
-        Window is (t - W, t].
-        """
-        raise NotImplementedError
+        # Evict timestamps not in (t - W, t]
+        while self._q and self._q[0] <= t - self.W:
+            self._q.popleft()
+
+        if len(self._q) < self.N:
+            self._q.append(t)
+            return True
+        else:
+            return False
